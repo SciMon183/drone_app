@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Drone Telemetry</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #111;
+      color: #fff;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    .telemetry {
+      padding: 20px;
+      background-color: #222;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .telemetry div {
+      margin: 10px;
+      padding: 10px 20px;
+      background-color: #333;
+      border-radius: 10px;
+    }
+    .alert-button {
+      background-color: red;
+      color: white;
+      padding: 15px 30px;
+      border: none;
+      font-size: 18px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .map {
+      flex: 1;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    a {
+      text-decoration: none;
+      color: white;
+    }
+  </style>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="telemetry">
+      <div><span id="speed">Speed: 0 km/h</span></div>
+      <div><span id="height">Height: 0 m</span></div>
+      <div><span id="battery">Battery: 88%</span></div>
+      <div><span id="gps">GPS Satellite: 4</span></div>
+      <button class="alert-button" onclick="alert('EMERGENCY STOP INITIATED!')">
+        <a href="in.html">STOP ALERT</a>
+      </button>
+    </div>
+    <div class="map">
+      <iframe 
+        src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d821.1336033519873!2d21.400317817222966!3d50.047008193360156!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1spl!2spl!4v1744608093500!5m2!1spl!2spl"
+        allowfullscreen=""
+        loading="lazy">
+      </iframe>
+    </div>
+  </div>
+
+  <script>
+    const socket = io();
+
+    let currentSpeed = 0;
+    let currentHeight = 0;
+    let targetSpeed = 0;
+    let heightRising = false;
+
+    const speedElement = document.getElementById("speed");
+    const heightElement = document.getElementById("height");
+
+    let updateInterval = setInterval(() => {
+      // oscylacja prędkości wokół targetSpeed
+      if (currentSpeed < targetSpeed) {
+        currentSpeed += Math.random() * 0.5 + 0.3;
+        if (currentSpeed > targetSpeed) currentSpeed = targetSpeed;
+      } else if (currentSpeed > targetSpeed) {
+        currentSpeed -= Math.random() * 0.5 + 0.3;
+        if (currentSpeed < targetSpeed) currentSpeed = targetSpeed;
+      }
+
+      // jeśli aktywowany wzrost wysokości po pause
+      if (heightRising) {
+        currentHeight += 1;
+        heightRising = false; // tylko raz
+      }
+
+      speedElement.innerText = "Speed: " + formatSpeed(currentSpeed) + " km/h";
+      heightElement.innerText = "Height: " + currentHeight.toFixed(2) + " m";
+    }, 300);
+
+    function formatSpeed(speed) {
+      return speed.toFixed(1);
+    }
+
+    // Obsługa wiadomości z control.html
+    window.addEventListener("message", handleAction);
+    socket.on("control-action", action => handleAction({ data: { action } }));
+
+    function handleAction(event) {
+      const action = event.data.action;
+
+      switch (action) {
+        case "start":
+          targetSpeed = 10;
+          currentHeight = 5 + Math.random(); // przykładowy start
+          break;
+
+        case "pause":
+          targetSpeed = 0;
+          setTimeout(() => {
+            heightRising = true;
+          }, 6000);
+          break;
+
+        case "play":
+          currentSpeed = 10; // od razu 10
+          targetSpeed = 10;
+          break;
+
+        case "land":
+          startLanding();
+          break;
+
+        case "ok":
+        case "przesylka":
+          showNotification(
+            action === "ok" ? "Wszystko OK" : "Paczka została dostarczona"
+          );
+          break;
+      }
+    }
+
+    function startLanding() {
+      clearInterval(updateInterval);
+      updateInterval = setInterval(() => {
+        if (currentSpeed > 0) {
+          currentSpeed -= 0.3;
+          currentSpeed = Math.max(0, currentSpeed);
+        } else if (currentHeight > 0) {
+          currentHeight -= 0.25;
+          currentHeight = Math.max(0, currentHeight);
+        }
+
+        speedElement.innerText = "Speed: " + formatSpeed(currentSpeed) + " km/h";
+        heightElement.innerText = "Height: " + currentHeight.toFixed(2) + " m";
+
+        if (currentSpeed === 0 && currentHeight === 0) {
+          clearInterval(updateInterval);
+        }
+      }, 300);
+    }
+
+    function showNotification(message) {
+      if (Notification.permission === "granted") {
+        new Notification(message);
+      } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then(permission => {
+          if (permission === "granted") {
+            new Notification(message);
+          }
+        });
+      }
+    }
+  </script>
+  <script src="script.js" async defer></script>
+</body>
+</html>

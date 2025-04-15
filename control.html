@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kontrola Drona</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    h1 {
+      font-size: 2em;
+      color: #fff;
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      background-color: #1e88e5;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #1565c0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Panel Kontrolny Drona</h1>
+
+  <button onclick="sendAction('start')">START</button>
+  <button onclick="sendAction('przesylka')">PRZESYŁKA DOSTARCZONA</button>
+  <button onclick="sendAction('land')">LĄDOWANIE</button>
+  <button onclick="sendAction('ok')">OK</button>
+  <button onclick="sendAction('pause')">PAUSE</button>
+  <button onclick="sendAction('play')">PLAY</button>
+
+  <script>
+    const socket = io();
+    let telemetryWindow = null;
+
+    function sendAction(action) {
+      socket.emit("control-action", action); // dla zdalnych urządzeń
+
+      // lokalnie wysyła akcję do telemetry.html
+      if (telemetryWindow && !telemetryWindow.closed) {
+        telemetryWindow.postMessage({ action }, "*");
+      }
+
+      // jeśli kliknięto START, otwieramy telemetry.html
+      if (action === "start") {
+        if (!telemetryWindow || telemetryWindow.closed) {
+          telemetryWindow = window.open("telemetry.html", "_blank");
+          if (!telemetryWindow) {
+            alert("Nie można otworzyć nowego okna. Sprawdź blokowanie popupów.");
+          }
+        } else {
+          telemetryWindow.focus();
+        }
+      }
+
+      // powiadomienia push dla niektórych akcji
+      if (action === "ok") {
+        showNotification("Wszystko OK");
+      } else if (action === "przesylka") {
+        showNotification("Twoja paczka została dostarczona");
+      }
+    }
+
+    function showNotification(message) {
+      if (Notification.permission === "granted") {
+        new Notification(message);
+      } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then(permission => {
+          if (permission === "granted") {
+            new Notification(message);
+          }
+        });
+      }
+    }
+  </script>
+  <script src="control.js" async defer></script>
+</body>
+</html>
