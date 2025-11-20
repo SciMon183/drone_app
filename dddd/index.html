@@ -1,0 +1,32 @@
+<!-- telemetry.html -->
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Drone Telemetry</title>
+  <link rel="stylesheet" href="telemetry.css" />
+  <script src="/socket.io/socket.io.js"></script>
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="telemetry">
+      <div><span id="speed">Speed: 0 km/h</span></div>
+      <div><span id="hight">Height: 0 m</span></div>
+      <div><span id="battery">Battery: 88%</span></div>
+      <div><span id="gps">GPS Satellite: 4</span></div>
+      <button class="alert-button" onclick="alert('EMERGENCY STOP INITIATED!')">
+        <a href="in.html">STOP ALERT</a>
+      </button>
+    </div>
+    <div class="map">
+      <iframe 
+        src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d821.1336033519873!2d21.400317817222966!3d50.047008193360156!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1spl!2spl!4v1744608093500!5m2!1spl!2spl"
+        allowfullscreen=""
+        loading="lazy">
+      </iframe>
+    </div>
+  </div>
+</body>
+</html>

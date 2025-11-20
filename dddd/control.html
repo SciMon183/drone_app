@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel Kontrolny Drona</title>
+  <link rel="stylesheet" href="control.css">
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="control.js" defer></script>
+</head>
+<body>
+  <h1>Panel Kontrolny Drona</h1>
+
+  <button onclick="startDrone()">START</button>
+  <button onclick="przesylkaDostarczona()">PRZESYŁKA DOSTARCZONA</button>
+  <button onclick="landDrone()">LĄDOWANIE</button>
+  <button onclick="ok()">OK</button>
+  <button onclick="pauseDrone()">PAUSE</button>
+  <button onclick="playDrone()">PLAY</button>
+  
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kontrola Drona</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      background-color: #1e88e5;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #1565c0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Panel Kontrolny Drona</h1>
+
+  <button onclick="startDrone()">START</button>
+  <button onclick="sendNotification('Twoja paczka została dostarczona')">PRZESYŁKA DOSTARCZONA</button>
+  <button onclick="landDrone()">LĄDOWANIE</button>
+  <button onclick="sendNotification('wszystko ok')">OK</button>
+  <button onclick="pauseDrone()">PAUSE</button>
+  <button onclick="playDrone()">PLAY</button>
+
+  <script src="control.js"></script>
+</body>
+</html>
